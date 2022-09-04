@@ -1,1 +1,22 @@
 <?php
+require_once 'functions.php';
+require_once 'db-connect.php';
+
+$posts = getResource("https://jsonplaceholder.typicode.com/posts");
+$comments = getResource("https://jsonplaceholder.typicode.com/comments");
+
+$insertedPostsCount = 0;
+foreach ($posts as $post) {
+    if (insertPost($post->id, $post->title, $post->body)) {
+        $insertedPostsCount++;
+    }
+}
+
+$insertedCommentsCount = 0;
+foreach ($comments as $comment) {
+    if (insertComment($comment->id, $comment->body, $comment->postId)) {
+        $insertedCommentsCount++;
+    }
+}
+
+echo "Загружено $insertedPostsCount записей и $insertedCommentsCount комментариев в базу данных";
