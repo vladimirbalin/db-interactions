@@ -11,8 +11,8 @@ function insertPost($id, $title, $body): bool
     global $connect;
 
     if ($query = $connect->query('SELECT id 
-                                           FROM posts 
-                                          WHERE id=' . $id)) {
+                                    FROM posts 
+                                   WHERE id=' . $id)) {
         if ($query->num_rows != 0) {
             return false;
         }
@@ -29,8 +29,8 @@ function insertComment($id, $body, $postId): bool
     global $connect;
 
     if ($query = $connect->query('SELECT id 
-                                           FROM comments 
-                                          WHERE id=' . $id)) {
+                                    FROM comments 
+                                   WHERE id=' . $id)) {
         if ($query->num_rows > 0) {
             return false;
         }
@@ -49,11 +49,11 @@ function searchInComments($text): array
 
     $text = "%$text%";
     $query = $connect->prepare('SELECT comments.id as comment_id, 
-                                              p.title as post_title,
-                                              comments.body as comment_body 
-                                         FROM comments 
-                                         JOIN posts p on p.id = comments.post_id
-                                        WHERE comments.body LIKE ?');
+                                       p.title as post_title,
+                                       comments.body as comment_body 
+                                  FROM comments 
+                                  JOIN posts p on p.id = comments.post_id
+                                 WHERE comments.body LIKE ?');
     $query->execute([$text]);
     return $query->get_result()->fetch_all(MYSQLI_ASSOC);
 }
