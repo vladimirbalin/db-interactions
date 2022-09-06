@@ -6,7 +6,7 @@ $comments = [];
 if (isset($_GET['text'])) {
     $sanitizedSearchText = htmlspecialchars($_GET['text']);
 
-    checkForSearchTextLength($sanitizedSearchText);
+    guardForMinimumSearchTextSize($sanitizedSearchText);
     $comments = searchInComments($sanitizedSearchText);
 }
 ?>

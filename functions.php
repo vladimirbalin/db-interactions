@@ -58,7 +58,7 @@ function searchInComments($text): array
     return $query->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-function checkForSearchTextLength($text){
+function guardForMinimumSearchTextSize($text){
     if (strlen($text) < 3) {
         die('Search text must be 3 or more symbols');
     }
