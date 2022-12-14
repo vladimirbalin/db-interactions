@@ -18,10 +18,11 @@ function dbHasPost($connect, $id)
               FROM posts 
              WHERE id=?';
     $statement = $connect->prepare($sql);
-    if ($statement->execute([$id])) {
-        if ($statement->rowCount() > 0) {
-            return true;
-        }
+    if (
+        $statement->execute([$id]) &&
+        $statement->rowCount() > 0
+    ) {
+        return true;
     }
     return false;
 }
@@ -46,18 +47,17 @@ function dbHasComment($pdo, $id)
               FROM comments 
              WHERE id=?';
     $statement = $pdo->prepare($sql);
-    if ($statement->execute([$id])) {
-        if ($statement->rowCount() > 0) {
-            return true;
-        }
+    if (
+        $statement->execute([$id]) &&
+        $statement->rowCount() > 0
+    ) {
+        return true;
     }
     return false;
 }
 
 function insertComment($pdo, $id, $body, $postId): bool
 {
-    if (dbHasComment($pdo, $id)) return false;
-
     $sql = 'INSERT INTO comments(id, body, post_id) 
             VALUES(?, ?, ?)';
     $statement = $pdo->prepare($sql);
@@ -65,7 +65,7 @@ function insertComment($pdo, $id, $body, $postId): bool
 }
 
 
-function searchInComments($pdo, $text): array
+function searchInComments(PDO $pdo, $text): array
 {
     $text = "%$text%";
     $query = $pdo->prepare('SELECT comments.id as comment_id, 
@@ -75,7 +75,7 @@ function searchInComments($pdo, $text): array
                               JOIN posts p on p.id = comments.post_id
                              WHERE comments.body LIKE ?');
     $query->execute([$text]);
-    return $query->get_result()->fetch_all(MYSQLI_ASSOC);
+    return $query->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function guardForMinimumSearchTextSize($text)
