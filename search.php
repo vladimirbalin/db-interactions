@@ -2,12 +2,16 @@
 require_once 'db-connect.php';
 require_once 'functions.php';
 
+/**
+ * @var $pdo PDO
+ */
+
 $comments = [];
 if (isset($_GET['text'])) {
     $sanitizedSearchText = htmlspecialchars($_GET['text']);
 
     guardForMinimumSearchTextSize($sanitizedSearchText);
-    $comments = searchInComments($sanitizedSearchText);
+    $comments = searchInComments($pdo, $sanitizedSearchText);
 }
 ?>
 
