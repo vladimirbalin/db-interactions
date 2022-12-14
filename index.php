@@ -2,19 +2,23 @@
 require_once 'functions.php';
 require_once 'db-connect.php';
 
+/**
+ * @var $pdo PDO
+ */
+
 $posts = getResource("https://jsonplaceholder.typicode.com/posts");
 $comments = getResource("https://jsonplaceholder.typicode.com/comments");
 
 $insertedPostsCount = 0;
 foreach ($posts as $post) {
-    if (insertPost($post->id, $post->title, $post->body)) {
+    if (handlePost($pdo, $post->id, $post->title, $post->body)) {
         $insertedPostsCount++;
     }
 }
 
 $insertedCommentsCount = 0;
 foreach ($comments as $comment) {
-    if (insertComment($comment->id, $comment->body, $comment->postId)) {
+    if (handleComment($pdo, $comment->id, $comment->body, $comment->postId)) {
         $insertedCommentsCount++;
     }
 }

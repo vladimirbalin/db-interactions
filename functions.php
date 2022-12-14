@@ -6,60 +6,81 @@ function getResource($url): array
     return json_decode($metaData);
 }
 
-function insertPost($id, $title, $body): bool
+function handlePost($pdo, $id, $title, $body): bool
 {
-    global $connect;
+    if (dbHasPost($pdo, $id)) return false;
+    return insertPost($pdo, $id, $title, $body);
+}
 
-    if ($query = $connect->query('SELECT id 
-                                    FROM posts 
-                                   WHERE id=' . $id)) {
-        if ($query->num_rows != 0) {
-            return false;
+function dbHasPost($connect, $id)
+{
+    $sql = 'SELECT id 
+              FROM posts 
+             WHERE id=?';
+    $statement = $connect->prepare($sql);
+    if ($statement->execute([$id])) {
+        if ($statement->rowCount() > 0) {
+            return true;
         }
     }
+    return false;
+}
 
+function insertPost($pdo, $id, $title, $body): bool
+{
     $sql = 'INSERT INTO posts(id, title, body) 
             VALUES (?, ?, ?)';
-    $statement = $connect->prepare($sql);
+    $statement = $pdo->prepare($sql);
     return $statement->execute([$id, $title, $body]);
 }
 
-function insertComment($id, $body, $postId): bool
+function handleComment($pdo, $id, $body, $postId): bool
 {
-    global $connect;
+    if (dbHasComment($pdo, $id)) return false;
+    return insertComment($pdo, $id, $body, $postId);
+}
 
-    if ($query = $connect->query('SELECT id 
-                                    FROM comments 
-                                   WHERE id=' . $id)) {
-        if ($query->num_rows > 0) {
-            return false;
+function dbHasComment($pdo, $id)
+{
+    $sql = 'SELECT id 
+              FROM comments 
+             WHERE id=?';
+    $statement = $pdo->prepare($sql);
+    if ($statement->execute([$id])) {
+        if ($statement->rowCount() > 0) {
+            return true;
         }
     }
+    return false;
+}
+
+function insertComment($pdo, $id, $body, $postId): bool
+{
+    if (dbHasComment($pdo, $id)) return false;
 
     $sql = 'INSERT INTO comments(id, body, post_id) 
             VALUES(?, ?, ?)';
-    $statement = $connect->prepare($sql);
+    $statement = $pdo->prepare($sql);
     return $statement->execute([$id, $body, $postId]);
 }
 
 
-function searchInComments($text): array
+function searchInComments($pdo, $text): array
 {
-    global $connect;
-
     $text = "%$text%";
-    $query = $connect->prepare('SELECT comments.id as comment_id, 
-                                       p.title as post_title,
-                                       comments.body as comment_body 
-                                  FROM comments 
-                                  JOIN posts p on p.id = comments.post_id
-                                 WHERE comments.body LIKE ?');
+    $query = $pdo->prepare('SELECT comments.id as comment_id, 
+                                   p.title as post_title,
+                                   comments.body as comment_body 
+                              FROM comments 
+                              JOIN posts p on p.id = comments.post_id
+                             WHERE comments.body LIKE ?');
     $query->execute([$text]);
     return $query->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-function guardForMinimumSearchTextSize($text){
-    if (strlen($text) < 3) {
+function guardForMinimumSearchTextSize($text)
+{
+    if (mb_strlen($text) < 3) {
         die('Search text must be 3 or more symbols');
     }
     return true;
